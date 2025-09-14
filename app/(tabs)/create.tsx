@@ -9,7 +9,8 @@ import * as ImagePicker from "expo-image-picker";
 import {Image} from "expo-image";
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import * as FileSystem from "expo-file-system";
+import { uploadAsync, FileSystemUploadType } from "expo-file-system/legacy";
+
 
 export default function CreateScreen() {
   const router =useRouter();
@@ -39,11 +40,11 @@ export default function CreateScreen() {
       setIsSharing(true);
       const uploadUrl=await generateUploadUrl();
 
-      const uploadResult = await FileSystem.uploadAsync(uploadUrl, selectedImage, {
+      const uploadResult = await uploadAsync(uploadUrl, selectedImage, {
         httpMethod: "POST",
-        uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+        uploadType: FileSystemUploadType.BINARY_CONTENT,
         mimeType: "image/jpeg",
-      });
+      });      
 
       if (uploadResult.status !== 200) throw new Error("Upload failed");
 
