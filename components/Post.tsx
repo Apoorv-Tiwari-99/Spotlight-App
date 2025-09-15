@@ -8,6 +8,7 @@ import { COLORS } from "@/constants/theme";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import CommentsModal from "./CommentsModal";
 
 type PostProps={
     post: {
@@ -30,6 +31,9 @@ type PostProps={
 export default function Post({ post }:PostProps) {
   const [isLiked,setIsLiked]=useState(post.isLiked);
   const [likeCount,setLikeCount]=useState(post.likes);
+  const [commentsCount,setCommentsCount]=useState(post.comments);
+  const [showComments,setShowComments]=useState(false);
+
 
    const toggleLike=useMutation(api.posts.toggleLike);
 
@@ -88,7 +92,7 @@ export default function Post({ post }:PostProps) {
             <Ionicons name={isLiked?"heart":"heart-outline"} size={24}  color={isLiked ? COLORS.primary : COLORS.white}
              />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={()=>setShowComments(true)}>
             <Ionicons
               name="chatbubble-outline"
               size={22}
@@ -122,6 +126,14 @@ export default function Post({ post }:PostProps) {
          2 hour ago
         </Text>
       </View>
+
+      <CommentsModal
+        postId={post._id}
+        visible={showComments}
+        onClose={() => setShowComments(false)}
+        onCommentAdded={()=>setCommentsCount((prev)=>prev+1)}
+      />
+
     </View>
   );
 }
