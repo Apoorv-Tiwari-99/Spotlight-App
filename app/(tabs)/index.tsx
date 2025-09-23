@@ -1,14 +1,13 @@
-import {  FlatList, Image, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import {styles} from "../../styles/feed.styles";
-import { useAuth } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "@/constants/theme";
-import { STORIES } from "@/constants/mock-data";
-import Story from "@/components/Story";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { Loader } from "@/components/Loader";
 import Post from "@/components/Post";
+import Stories from "@/components/Stories";
+import { COLORS } from "@/constants/theme";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "convex/react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { styles } from "../../styles/feed.styles";
 
 export default function Index() {
 
@@ -38,23 +37,11 @@ export default function Index() {
        keyExtractor={(item)=>item._id}
        showsVerticalScrollIndicator={false}
        contentContainerStyle={{paddingBottom:60}}
-       ListHeaderComponent={<StoriesSection/>}
+       ListHeaderComponent={<Stories/>}
       />
 
     </View>
   );
-}
-
-const StoriesSection=()=>{
-  return (
-       <ScrollView showsHorizontalScrollIndicator={false} horizontal
-        style={styles.storiesContainer} 
-      >
-        {STORIES.map((story)=>(
-          <Story key={story.id} story={story}/>
-        ))}
-      </ScrollView> 
-  )
 }
 
 const NoPostsFound = () => (

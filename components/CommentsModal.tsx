@@ -35,7 +35,20 @@ export default function CommentsModal({
 
   const addComment = useMutation(api.comments.addComment);
 
-  const handleAddComment = async () => {};
+  const handleAddComment = async () => {
+    if(!newComment.trim()) return ;
+    try {
+      await addComment({
+        postId,
+        content:newComment,
+      });
+      setNewComment("");
+      onCommentAdded();
+
+    } catch (error) {
+      console.log("Error adding comments",error);
+    }
+  };
 
   return (
     <Modal

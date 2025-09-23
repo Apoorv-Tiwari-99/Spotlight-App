@@ -6,9 +6,12 @@ import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/constants/theme";
 import { Id } from "@/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import CommentsModal from "./CommentsModal";
+import { formatDistanceToNow } from "date-fns";
+import { toggleBookmark } from "@/convex/bookmarks";
+import { useUser } from "@clerk/clerk-expo";
 
 type PostProps={
     post: {
@@ -30,12 +33,19 @@ type PostProps={
 
 export default function Post({ post }:PostProps) {
   const [isLiked,setIsLiked]=useState(post.isLiked);
+  const [isBookmarked,setIsBookmarked]=useState(post.isBookmarked);
   const [likeCount,setLikeCount]=useState(post.likes);
   const [commentsCount,setCommentsCount]=useState(post.comments);
   const [showComments,setShowComments]=useState(false);
 
+  const {user}=useUser();
+
+  const currentUser=useQuery(api.users.getUserByClerkId,user?{clerkId:user.id}:"skip");
+
 
    const toggleLike=useMutation(api.posts.toggleLike);
+   const toogleBookmark=useMutation(api.bookmarks.toggleBookmark);
+   const deletePost=useMutation(api.posts.deletePost);
 
   const handleLike=async()=>{
         try {
@@ -46,6 +56,23 @@ export default function Post({ post }:PostProps) {
           console.log("Error toggling like:",error);
         }
   }
+
+  const handleBookmark=async()=>{
+     const newIsBookmarked= await toogleBookmark({
+       postId:post._id,
+     });
+
+     setIsBookmarked(newIsBookmarked);
+  }
+
+  const handleDelete=async()=>{
+      try {
+        await deletePost({postId:post._id});
+      } catch (error) {
+        console.log("Error deleting post:",error);
+      }
+  }
+
 
   return (
     <View style={styles.post}>
@@ -64,14 +91,18 @@ export default function Post({ post }:PostProps) {
             <Text style={styles.postUsername}>{post.author.username}</Text>
           </TouchableOpacity>
         </Link>
+  
 
-        {/* <TouchableOpacity onPress={()=>{}}>
-            <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
-          </TouchableOpacity> */}
-
-        <TouchableOpacity>
+        {/* If i'm the owner of the post ,show the delete button otherwise not */}
+        {post.author._id===currentUser?._id?(
+           <TouchableOpacity onPress={handleDelete}>
+           <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
+         </TouchableOpacity>
+        ):(
+          <TouchableOpacity>
           <Ionicons name="ellipsis-horizontal" size={20} color={COLORS.white} />
         </TouchableOpacity>
+        )}
       </View>
 
       {/* POST IMAGE  */}
@@ -100,8 +131,8 @@ export default function Post({ post }:PostProps) {
             />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity>
-          <Ionicons name={"bookmark-outline"} size={22} color={COLORS.white} />
+        <TouchableOpacity onPress={handleBookmark}>
+          <Ionicons name={isBookmarked?"bookmark":"bookmark-outline"} size={22} color={COLORS.white} />
         </TouchableOpacity>
       </View>
 
@@ -117,13 +148,14 @@ export default function Post({ post }:PostProps) {
           </View>
         )} 
 
-      
-          <TouchableOpacity >
-            <Text style={styles.commentsText}>View all 2 comments</Text>
-          </TouchableOpacity>
+           {commentsCount>0 && (
+            <TouchableOpacity onPress={()=>setShowComments(true)}>
+            <Text style={styles.commentsText}>View all {commentsCount} comments</Text>
+            </TouchableOpacity>
+           )}
 
         <Text style={styles.timeAgo}>
-         2 hour ago
+         {formatDistanceToNow(post._creationTime,{addSuffix:true})}
         </Text>
       </View>
 
