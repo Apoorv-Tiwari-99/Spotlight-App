@@ -5,6 +5,7 @@ import ClerkAndConvexProvider from "@/providers/ClerkAndConvexProvider";
 import { SplashScreen } from "expo-router";
 import {useFonts} from "expo-font";
 import { useCallback } from "react";
+import {StatusBar} from "expo-status-bar";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,6 +31,7 @@ export default function RootLayout() {
             <InitialLayout />
           </SafeAreaView>
         </SafeAreaProvider>
+        <StatusBar style="light" />
         </ClerkAndConvexProvider>
   );
 }
